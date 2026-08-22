@@ -1,51 +1,61 @@
 # TrueReview — Genuine Product Review Analyzer
 
-Paste any product URL and get honest insights from real user reviews across Reddit, Amazon, forums, and more.
+Paste any product URL and get honest insights from real user reviews across Reddit, Amazon, forums, and more — powered by AI.
 
 ---
 
 ## Project Structure
 
 ```
-reviewapp/
+truereview/
 ├── index.html      ← Frontend (UI)
 ├── server.js       ← Backend (Node.js + Express)
 ├── package.json    ← Dependencies
 ├── .env.example    ← API key template
+├── .gitignore      ← Ignores node_modules and .env
 └── README.md
 ```
 
 ---
 
+## Tech Stack
+
+- **Frontend** — HTML, CSS, JavaScript
+- **Backend** — Node.js + Express
+- **AI** — OpenRouter API (free tier)
+- **Model** — openrouter/auto (picks best available free model)
+
+---
+
 ## Setup (Step by Step)
 
-### 1. Get your Anthropic API key
-- Go to https://console.anthropic.com
-- Sign up / log in
-- Go to "API Keys" → Create a new key
-- Copy it
-
-### 2. Install Node.js
+### 1. Install Node.js
 - Download from https://nodejs.org (choose LTS version)
-- Install it, then verify: open terminal and run `node -v`
-
-### 3. Set up the project
-Open terminal in the `reviewapp` folder and run:
-
+- Install it, then verify:
 ```bash
-# Install dependencies
+node -v
+npm -v
+```
+
+### 2. Get your OpenRouter API key
+- Go to https://openrouter.ai
+- Sign up / log in
+- Click **API Keys** → **Create Key**
+- Copy it (starts with `sk-or-v1-...`)
+
+### 3. Install dependencies
+Open terminal in the `truereview` folder and run:
+```bash
 npm install
-
-# Create your .env file
-cp .env.example .env
+npm install dotenv
 ```
 
-### 4. Add your API key
-Open `.env` in any text editor and replace:
+### 4. Set up your `.env` file
+Rename `.env.example` to `.env` and add your key:
 ```
-ANTHROPIC_API_KEY=your_api_key_here
+OPENROUTER_API_KEY=sk-or-v1-xxxxxxxxxx
+PORT=3000
 ```
-with your actual key.
 
 ### 5. Run the server
 ```bash
@@ -54,11 +64,11 @@ node server.js
 
 You should see:
 ```
-TrueReview server running at http://localhost:3000
+TrueReview running at http://localhost:3000
 ```
 
 ### 6. Open the app
-Go to http://localhost:3000 in your browser. Paste any product URL and hit Analyze!
+Go to **http://localhost:3000** in your browser. Paste any product URL and hit Analyze!
 
 ---
 
@@ -67,10 +77,10 @@ Go to http://localhost:3000 in your browser. Paste any product URL and hit Analy
 ```
 Browser (index.html)
     ↓  POST /analyze  { url: "..." }
-server.js (Express)
-    ↓  calls Anthropic API with your secret key
-Anthropic API (Claude + web search)
-    ↓  returns JSON review data
+server.js (Node.js + Express)
+    ↓  calls OpenRouter API with your secret key
+OpenRouter API (AI model)
+    ↓  researches reviews and returns JSON data
 server.js
     ↓  sends JSON back to browser
 Browser renders the results dashboard
@@ -80,5 +90,20 @@ Your API key stays on the server — never exposed to the browser.
 
 ---
 
-## Next Step: Deploy to the internet (Step 3)
-Once this works locally, we'll deploy it free on Vercel so anyone can use it.
+## What it shows
+
+- Overall score (out of 10)
+- Total reviews found
+- Trust score
+- Sentiment breakdown (Positive / Neutral / Negative)
+- What people love (Pros)
+- Common complaints (Cons)
+- Honest verdict
+- Sources checked
+
+---
+
+## Next Steps
+- Deploy live on Vercel (free)
+- Add price comparison across Amazon, Flipkart etc
+- Add MongoDB for caching results
