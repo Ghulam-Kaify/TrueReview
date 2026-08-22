@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TrueReview — Genuine product insights</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0d0d0d;
+      --surface: #161616;
+      --surface2: #1e1e1e;
+      --border: #2a2a2a;
+      --border2: #333;
+      --text: #f0ede8;
+      --muted: #888;
+      --accent: #c8f060;
+      --accent-dim: #a8d040;
+      --red: #ff5a4a;
+      --yellow: #f5c842;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      min-height: 100vh;
+    }
+
+    /* NAV */
+    nav {
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 58px;
+    }
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      letter-spacing: -0.5px;
+      color: var(--text);
+    }
+    .logo span { color: var(--accent); }
+    .nav-tag {
+      font-size: 12px;
+      color: var(--muted);
+      border: 1px solid var(--border2);
+      padding: 4px 12px;
+      border-radius: 99px;
+    }
+
+    /* HERO */
+    .hero {
+      max-width: 720px;
+      margin: 6rem auto 4rem;
+      padding: 0 2rem;
+      text-align: center;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--accent);
+      border: 1px solid rgba(200,240,96,0.3);
+      padding: 5px 14px;
+      border-radius: 99px;
+      margin-bottom: 1.5rem;
+      background: rgba(200,240,96,0.06);
+    }
+    .hero-badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.8); }
+    }
+    .hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.2rem, 5vw, 3.4rem);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -1.5px;
+      margin-bottom: 1.2rem;
+      color: var(--text);
+    }
+    .hero h1 em {
+      font-style: normal;
+      color: var(--accent);
+    }
+    .hero p {
+      font-size: 16px;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 480px;
+      margin: 0 auto 2.5rem;
+    }
+
+    /* SEARCH BOX */
+    .search-box {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      padding: 6px 6px 6px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: border-color 0.2s;
+      max-width: 580px;
+      margin: 0 auto;
+    }
+    .search-box:focus-within {
+      border-color: var(--accent);
+    }
+    .search-box input {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+    }
+    .search-box input::placeholder { color: var(--muted); }
+    .search-btn {
+      background: var(--accent);
+      color: #0d0d0d;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 10px 20px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .search-btn:hover { background: var(--accent-dim); }
+    .search-btn:active { transform: scale(0.97); }
+
+    .hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    /* MAIN CONTENT */
+    .main {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0 2rem 6rem;
+    }
+
+    /* EMPTY STATE */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--muted);
+    }
+    .empty-icon {
+      font-size: 48px;
+      margin-bottom: 1rem;
+      opacity: 0.3;
+    }
+    .empty-state h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 6px;
+    }
+    .empty-state p { font-size: 13px; }
+
+    /* LOADING */
+    .loading-state {
+      display: none;
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+    .loading-state.active { display: block; }
+    .loader {
+      display: inline-flex;
+      gap: 6px;
+      margin-bottom: 1.5rem;
+    }
+    .loader span {
+      width: 8px; height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: bounce 1.2s infinite;
+    }
+    .loader span:nth-child(2) { animation-delay: 0.2s; }
+    .loader span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce {
+      0%,80%,100% { transform: scale(0.6); opacity: 0.4; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+    .loading-state p { color: var(--muted); font-size: 14px; }
+    .loading-steps {
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .loading-step {
+      font-size: 12px;
+      color: #444;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .loading-step.done { color: var(--accent); }
+    .loading-step.active { color: var(--muted); }
+
+    /* RESULTS */
+    .results { display: none; }
+    .results.active { display: block; }
+
+    .product-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .product-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .product-url {
+      font-size: 12px;
+      color: var(--muted);
+      word-break: break-all;
+    }
+    .big-score {
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .big-score .num {
+      font-family: 'Syne', sans-serif;
+      font-size: 42px;
+      font-weight: 700;
+      line-height: 1;
+      color: var(--accent);
+    }
+    .big-score .denom { font-size: 18px; color: var(--muted); }
+    .big-score .label { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+    /* STAT CARDS */
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.2rem;
+    }
+    .stat-card .s-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+    .stat-card .s-val {
+      font-family: 'Syne', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .stat-card .s-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    /* SENTIMENT BAR */
+    .sentiment-section { margin-bottom: 2rem; }
+    .section-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .sent-bar {
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      display: flex;
+      gap: 3px;
+      margin-bottom: 10px;
+      background: var(--surface2);
+    }
+    .sent-pos { background: var(--accent); border-radius: 4px; }
+    .sent-neu { background: #555; border-radius: 4px; }
+    .sent-neg { background: var(--red); border-radius: 4px; }
+    .sent-legend {
+      display: flex;
+      gap: 20px;
+    }
+    .sent-legend span {
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+    /* PROS CONS */
+    .pc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 2rem;
+    }
+    .pc-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.2rem;
+    }
+    .pc-card h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .pc-pros h3 { color: var(--accent); }
+    .pc-cons h3 { color: var(--red); }
+    .pc-card ul { list-style: none; }
+    .pc-card ul li {
+      font-size: 13px;
+      color: #aaa;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--border);
+      line-height: 1.5;
+      display: flex;
+      gap: 8px;
+    }
+    .pc-card ul li:last-child { border-bottom: none; }
+    .pc-card ul li::before {
+      flex-shrink: 0;
+      margin-top: 2px;
+      font-size: 12px;
+    }
+    .pc-pros ul li::before { content: '+'; color: var(--accent); font-weight: 700; }
+    .pc-cons ul li::before { content: '−'; color: var(--red); font-weight: 700; }
+
+    /* VERDICT */
+    .verdict-card {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      padding: 1.4rem 1.6rem;
+      margin-bottom: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .verdict-card::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: var(--accent);
+      border-radius: 3px 0 0 3px;
+    }
+    .verdict-card .v-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .verdict-card p {
+      font-size: 14px;
+      color: #ccc;
+      line-height: 1.8;
+    }
+
+    /* SOURCES */
+    .sources-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .source-chip {
+      font-size: 12px;
+      padding: 5px 12px;
+      border-radius: 99px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      color: var(--muted);
+    }
+
+    /* ERROR */
+    .error-state {
+      display: none;
+      background: rgba(255,90,74,0.08);
+      border: 1px solid rgba(255,90,74,0.3);
+      border-radius: var(--radius);
+      padding: 1rem 1.4rem;
+      color: var(--red);
+      font-size: 14px;
+      margin-bottom: 1.5rem;
+    }
+    .error-state.active { display: block; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">True<span>Review</span></div>
+  <span class="nav-tag">AI-powered · real opinions</span>
+</nav>
+
+<div class="hero">
+  <div class="hero-badge">Powered by AI web search</div>
+  <h1>Know what <em>real people</em><br>think before you buy</h1>
+  <p>Paste any product link. We scan Reddit, forums, review sites and surface honest opinions — not sponsored fluff.</p>
+
+  <div class="search-box">
+    <input type="text" id="urlInput" placeholder="Paste product URL here — amazon, flipkart, anything..." />
+    <button class="search-btn" onclick="analyze()">Analyze →</button>
+  </div>
+  <p class="hint">Try: amazon.in/dp/... &nbsp;·&nbsp; flipkart.com/... &nbsp;·&nbsp; or any product page</p>
+</div>
+
+<div class="main">
+  <div class="error-state" id="errorBox"></div>
+
+  <!-- EMPTY -->
+  <div class="empty-state" id="emptyState">
+    <div class="empty-icon">🔍</div>
+    <h3>No product analyzed yet</h3>
+    <p>Paste a URL above and hit Analyze</p>
+  </div>
+
+  <!-- LOADING -->
+  <div class="loading-state" id="loadingState">
+    <div class="loader">
+      <span></span><span></span><span></span>
+    </div>
+    <p>Researching reviews across the web…</p>
+    <div class="loading-steps">
+      <div class="loading-step active" id="step1">⟳ &nbsp;Identifying product</div>
+      <div class="loading-step" id="step2">⟳ &nbsp;Searching Reddit &amp; forums</div>
+      <div class="loading-step" id="step3">⟳ &nbsp;Analyzing sentiment</div>
+      <div class="loading-step" id="step4">⟳ &nbsp;Building your report</div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="results" id="resultsBox">
+    <div class="product-header">
+      <div>
+        <div class="product-title" id="rProductName">—</div>
+        <div class="product-url" id="rProductUrl">—</div>
+      </div>
+      <div class="big-score">
+        <div><span class="num" id="rScore">—</span><span class="denom">/10</span></div>
+        <div class="label">Overall score</div>
+      </div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="s-label">Reviews found</div>
+        <div class="s-val" id="rTotal">—</div>
+        <div class="s-sub">sources scanned</div>
+      </div>
+      <div class="stat-card">
+        <div class="s-label">Trust score</div>
+        <div class="s-val" id="rTrust">—</div>
+        <div class="s-sub">authenticity</div>
+      </div>
+      <div class="stat-card">
+        <div class="s-label">Positive</div>
+        <div class="s-val" id="rPos">—</div>
+        <div class="s-sub">satisfied users</div>
+      </div>
+    </div>
+
+    <div class="sentiment-section">
+      <div class="section-title">Sentiment breakdown</div>
+      <div class="sent-bar">
+        <div class="sent-pos" id="barPos" style="width:0%"></div>
+        <div class="sent-neu" id="barNeu" style="width:0%"></div>
+        <div class="sent-neg" id="barNeg" style="width:0%"></div>
+      </div>
+      <div class="sent-legend">
+        <span><span class="dot" style="background:var(--accent)"></span><span id="legPos">Positive 0%</span></span>
+        <span><span class="dot" style="background:#555"></span><span id="legNeu">Neutral 0%</span></span>
+        <span><span class="dot" style="background:var(--red)"></span><span id="legNeg">Negative 0%</span></span>
+      </div>
+    </div>
+
+    <div class="pc-grid">
+      <div class="pc-card pc-pros">
+        <h3>✦ What people love</h3>
+        <ul id="prosList"></ul>
+      </div>
+      <div class="pc-card pc-cons">
+        <h3>✦ Common complaints</h3>
+        <ul id="consList"></ul>
+      </div>
+    </div>
+
+    <div class="verdict-card">
+      <div class="v-label">Honest verdict</div>
+      <p id="rVerdict">—</p>
+    </div>
+
+    <div class="section-title" style="margin-bottom:10px">Sources checked</div>
+    <div class="sources-row" id="sourcesList"></div>
+  </div>
+</div>
+
+<script>
+  let stepTimer;
+
+  async function analyze() {
+    const url = document.getElementById('urlInput').value.trim();
+    if (!url) { showError('Please enter a product URL.'); return; }
+    clearError();
+    showLoading();
+    animateSteps();
+
+    try {
+      const res = await fetch('/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url })
+      });
+
+      const data = await res.json();
+      clearStepTimer();
+
+      if (!res.ok) throw new Error(data.error || 'Server error');
+      renderResults(data, url);
+
+    } catch (err) {
+      clearStepTimer();
+      document.getElementById('loadingState').classList.remove('active');
+      document.getElementById('emptyState').style.display = 'block';
+      showError('Error: ' + err.message);
+    }
+  }
+
+  function animateSteps() {
+    const steps = ['step1','step2','step3','step4'];
+    let i = 0;
+    stepTimer = setInterval(() => {
+      if (i > 0) {
+        document.getElementById(steps[i-1]).textContent =
+          '✓  ' + document.getElementById(steps[i-1]).textContent.replace('⟳  ','');
+        document.getElementById(steps[i-1]).classList.add('done');
+      }
+      if (i < steps.length) {
+        document.getElementById(steps[i]).classList.add('active');
+        i++;
+      }
+    }, 700);
+  }
+
+  function clearStepTimer() { clearInterval(stepTimer); }
+
+  function renderResults(d, url) {
+    document.getElementById('emptyState').style.display = 'none';
+    document.getElementById('loadingState').classList.remove('active');
+    document.getElementById('resultsBox').classList.add('active');
+
+    document.getElementById('rProductName').textContent = d.product_name;
+    document.getElementById('rProductUrl').textContent = url;
+    document.getElementById('rScore').textContent = Number(d.overall_score).toFixed(1);
+    document.getElementById('rTotal').textContent = Number(d.total_reviews_found).toLocaleString();
+    document.getElementById('rTrust').textContent = Math.round(d.trust_score) + '%';
+
+    const pos = Math.round(d.sentiment.positive);
+    const neu = Math.round(d.sentiment.neutral);
+    const neg = Math.round(d.sentiment.negative);
+    document.getElementById('rPos').textContent = pos + '%';
+    document.getElementById('barPos').style.width = pos + '%';
+    document.getElementById('barNeu').style.width = neu + '%';
+    document.getElementById('barNeg').style.width = neg + '%';
+    document.getElementById('legPos').textContent = 'Positive ' + pos + '%';
+    document.getElementById('legNeu').textContent = 'Neutral ' + neu + '%';
+    document.getElementById('legNeg').textContent = 'Negative ' + neg + '%';
+
+    document.getElementById('prosList').innerHTML =
+      (d.pros || []).map(p => `<li>${p}</li>`).join('');
+    document.getElementById('consList').innerHTML =
+      (d.cons || []).map(c => `<li>${c}</li>`).join('');
+
+    document.getElementById('rVerdict').textContent = d.verdict;
+    document.getElementById('sourcesList').innerHTML =
+      (d.sources || []).map(s => `<span class="source-chip">${s}</span>`).join('');
+  }
+
+  function showLoading() {
+    document.getElementById('emptyState').style.display = 'none';
+    document.getElementById('resultsBox').classList.remove('active');
+    // reset steps
+    ['step1','step2','step3','step4'].forEach((id,i) => {
+      const el = document.getElementById(id);
+      const labels = ['Identifying product','Searching Reddit & forums','Analyzing sentiment','Building your report'];
+      el.textContent = '⟳  ' + labels[i];
+      el.className = 'loading-step' + (i === 0 ? ' active' : '');
+    });
+    document.getElementById('loadingState').classList.add('active');
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('errorBox');
+    el.textContent = msg;
+    el.classList.add('active');
+  }
+  function clearError() {
+    document.getElementById('errorBox').classList.remove('active');
+  }
+</script>
+</body>
+</html>
