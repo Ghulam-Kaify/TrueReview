@@ -103,7 +103,3 @@ Your API key stays on the server — never exposed to the browser.
 
 ---
 
-## Next Steps
-- Deploy live on Vercel (free)
-- Add price comparison across Amazon, Flipkart etc
-- Add MongoDB for caching results
