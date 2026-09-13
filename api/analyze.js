@@ -1,3 +1,26 @@
+import mongoose from 'mongoose';
+
+const ReviewSchema = new mongoose.Schema({
+  url: { type: String, unique: true },
+  product_name: String,
+  overall_score: Number,
+  total_reviews_found: Number,
+  sentiment: Object,
+  trust_score: Number,
+  pros: [String],
+  cons: [String],
+  verdict: String,
+  sources: [String],
+  createdAt: { type: Date, default: Date.now }
+});
+
+const Review = mongoose.models.Review || mongoose.model('Review', ReviewSchema);
+
+async function connectDB() {
+  if (mongoose.connection.readyState >= 1) return;
+  await mongoose.connect(process.env.MONGODB_URI);
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -8,15 +31,11 @@ export default async function handler(req, res) {
 
   // check cache
   try {
-    const { MongoClient } = await import('mongodb');
-    const client = new MongoClient(process.env.MONGODB_URI);
-    await client.connect();
-    const collection = client.db('truereview').collection('reviews');
-    const cached = await collection.findOne({ url });
-    await client.close();
-
+    await connectDB();
+    const cached = await Review.findOne({ url }).lean();
     if (cached) {
-      const { _id, ...data } = cached;
+      console.log('Cache hit:', cached.product_name);
+      const { _id, __v, ...data } = cached;
       return res.json(data);
     }
   } catch (err) {
@@ -82,12 +101,8 @@ IMPORTANT: You MUST return a complete JSON object with ALL fields filled with re
 
       // save to cache
       try {
-        const { MongoClient } = await import('mongodb');
-        const client = new MongoClient(process.env.MONGODB_URI);
-        await client.connect();
-        const collection = client.db('truereview').collection('reviews');
-        await collection.insertOne({ url, ...parsed, createdAt: new Date() });
-        await client.close();
+        await connectDB();
+        await Review.create({ url, ...parsed });
         console.log('Saved to cache:', parsed.product_name);
       } catch (dbErr) {
         console.error('Cache write error:', dbErr.message);
