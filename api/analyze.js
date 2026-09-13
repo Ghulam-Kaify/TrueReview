@@ -1,3 +1,12 @@
+import { MongoClient } from 'mongodb';
+
+const client = new MongoClient(process.env.MONGODB_URI);
+
+async function getDB() {
+  await client.connect();
+  return client.db('truereview').collection('reviews');
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -5,6 +14,20 @@ export default async function handler(req, res) {
 
   const { url } = req.body;
   if (!url) return res.status(400).json({ error: 'No URL provided' });
+
+  try {
+    // check cache first
+    const collection = await getDB();
+    const cached = await collection.findOne({ url });
+    if (cached) {
+      console.log('Returning cached result for:', url);
+      const { _id, ...data } = cached;
+      return res.json({ ...data, cached: true });
+    }
+  } catch (err) {
+    console.error('MongoDB error:', err.message);
+    // continue even if DB fails
+  }
 
   const PROMPT = `
 You are a product review researcher. Research genuine user reviews for this product: ${url}
@@ -63,6 +86,15 @@ IMPORTANT: You MUST return a complete JSON object with ALL fields filled with re
       const required = ['product_name', 'overall_score', 'total_reviews_found', 'sentiment', 'trust_score', 'pros', 'cons', 'verdict', 'sources'];
       const missing = required.filter(k => !parsed[k]);
       if (missing.length > 0) throw new Error(`Missing fields: ${missing.join(', ')}`);
+
+      // save to MongoDB cache
+      try {
+        const collection = await getDB();
+        await collection.insertOne({ url, ...parsed, createdAt: new Date() });
+        console.log('Saved to cache:', parsed.product_name);
+      } catch (dbErr) {
+        console.error('Failed to cache:', dbErr.message);
+      }
 
       return res.json(parsed);
 
