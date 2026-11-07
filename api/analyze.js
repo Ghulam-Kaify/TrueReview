@@ -43,25 +43,25 @@ export default async function handler(req, res) {
   }
 
   const PROMPT = `
-You are a product review researcher. Research genuine user reviews for this product: ${url}
+You are a product review analyst. Analyze user opinion for this product: ${url}
 
-Search Reddit discussions, Amazon reviews, tech forums, YouTube comments, and community sources for this SPECIFIC product.
+Use the product name visible in the URL. Base your answer on what real users commonly say on Reddit, Amazon, tech forums and YouTube about this specific product.
 
-Based on your actual research, respond ONLY with a valid JSON object — no markdown, no backticks, no explanation before or after. Use REAL data you find, not placeholder numbers.
+Respond with ONLY a valid JSON object with exactly these fields:
 
 {
-  "product_name": "actual product name from the URL",
-  "overall_score": 7.5,
-  "total_reviews_found": 850,
-  "sentiment": { "positive": 70, "neutral": 18, "negative": 12 },
-  "trust_score": 75,
-  "pros": ["actual pro from real reviews", "actual pro", "actual pro", "actual pro"],
-  "cons": ["actual con from real reviews", "actual con", "actual con"],
-  "verdict": "2-3 sentences summarizing what real users actually say about this specific product",
-  "sources": ["actual sources you checked like Reddit, Amazon, etc"]
+  "product_name": string,
+  "overall_score": number between 1 and 10 (one decimal),
+  "total_reviews_found": integer estimate,
+  "sentiment": { "positive": number, "neutral": number, "negative": number } (must sum to 100),
+  "trust_score": integer 0-100,
+  "pros": [4 short strings],
+  "cons": [3 short strings],
+  "verdict": string (2-3 sentences),
+  "sources": [strings]
 }
 
-IMPORTANT: You MUST return a complete JSON object with ALL fields filled with real data. Never leave any field empty or as placeholder text. If you don't know exact numbers, make reasonable estimates based on the product type and name. Return ONLY the JSON. Nothing before it, nothing after it.
+Every field must be filled with product-specific values. No placeholders. No text outside the JSON.
 `;
 
   const MAX_RETRIES = 3;
@@ -69,26 +69,25 @@ IMPORTANT: You MUST return a complete JSON object with ALL fields filled with re
 
   while (attempt < MAX_RETRIES) {
     try {
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-          'HTTP-Referer': 'https://true-review-taupe.vercel.app',
-          'X-Title': 'TrueReview'
+          'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
         },
         body: JSON.stringify({
-          model: 'openrouter/auto',
-          messages: [{ role: 'user', content: PROMPT }]
+          model: 'llama-3.3-70b-versatile',
+          messages: [{ role: 'user', content: PROMPT }],
+          temperature: 0.2,
+          max_tokens: 800,
+          response_format: { type: 'json_object' }
         })
       });
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error?.message || 'OpenRouter API error');
+      if (!response.ok) throw new Error(data.error?.message || 'Groq API error');
 
-      let raw = data.choices?.[0]?.message?.content || '';
-      raw = raw.replace(/```json|```/g, '').trim();
-
+      const raw = data.choices?.[0]?.message?.content || '';
       const start = raw.indexOf('{');
       const end = raw.lastIndexOf('}');
       if (start === -1 || end === -1) throw new Error('No JSON in response');
