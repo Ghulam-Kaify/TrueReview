@@ -76,7 +76,7 @@ Every field must be filled with product-specific values. No placeholders. No tex
           'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
         },
         body: JSON.stringify({
-          model: 'llama-3.1-8b-instant',
+          model: 'openai/gpt-oss-120b',
           messages: [{ role: 'user', content: PROMPT }],
           temperature: 0.2,
           max_tokens: 800,
