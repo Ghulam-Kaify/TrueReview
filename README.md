@@ -22,8 +22,8 @@ truereview/
 
 - **Frontend** — HTML, CSS, JavaScript
 - **Backend** — Node.js + Express
-- **AI** — OpenRouter API (free tier)
-- **Model** — openrouter/auto (picks best available free model)
+- **AI** — Groq API(free tier),model openai/gpt-oss-120b
+
 
 ---
 
@@ -37,11 +37,11 @@ node -v
 npm -v
 ```
 
-### 2. Get your OpenRouter API key
-- Go to https://openrouter.ai
+### 2. Get your GROQ_API_KEY
+- Go to https:(console.groq.com)
 - Sign up / log in
 - Click **API Keys** → **Create Key**
-- Copy it (starts with `sk-or-v1-...`)
+- Copy it (starts with `.........`)
 
 ### 3. Install dependencies
 Open terminal in the `truereview` folder and run:
@@ -53,7 +53,7 @@ npm install dotenv
 ### 4. Set up your `.env` file
 Rename `.env.example` to `.env` and add your key:
 ```
-OPENROUTER_API_KEY=sk-or-v1-xxxxxxxxxx
+GROQ_API_KEY=xxxxxxxx-xxxxxxxxxx
 PORT=3000
 ```
 
